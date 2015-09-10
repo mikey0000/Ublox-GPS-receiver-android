@@ -31,21 +31,19 @@ public class MockLocationProvider {
                 android.location.Criteria.ACCURACY_FINE);
 
         lm.setTestProviderEnabled(providerName, true);
-
-        lm.setTestProviderStatus
-                (
-                        providerName,
-                        LocationProvider.AVAILABLE,
-                        null,
-                        System.currentTimeMillis()
-                );
     }
 
     public void pushLocation(Location mockLocation) {
         LocationManager lm = (LocationManager) ctx.getSystemService(
                 Context.LOCATION_SERVICE);
 
-        mockLocation.setTime(System.currentTimeMillis());
+        lm.setTestProviderStatus
+                (
+                        LocationManager.GPS_PROVIDER,
+                        LocationProvider.AVAILABLE,
+                        null,
+                        System.currentTimeMillis()
+                );
         lm.setTestProviderLocation(providerName, mockLocation);
     }
 
