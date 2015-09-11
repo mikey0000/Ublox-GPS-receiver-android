@@ -1,6 +1,7 @@
 package src.com.hoho.android.usbserial.examples;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
@@ -47,6 +48,7 @@ public class BackgroundService extends Service {
                 @Override
                 public void onRunError(Exception e) {
                     Log.d(TAG, "Runner stopped.");
+                    startIoManager();
                 }
 
                 @Override
@@ -126,6 +128,23 @@ public class BackgroundService extends Service {
         startReceiverThread();
         return Service.START_REDELIVER_INTENT;
     }
+
+
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+                stopIoManager();
+            }
+
+            if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+                //startIoManager();
+            }
+        }
+    };
+
 
     private void stopIoManager() {
         if (mSerialIoManager != null) {
