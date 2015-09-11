@@ -130,7 +130,17 @@ public class NMEAParser {
             String type = tokens[0];
             //TODO check crc
             if (sentenceParsers.containsKey(type)) {
-                sentenceParsers.get(type).parse(tokens, position);
+                try {
+                    for (int c = 0; c < tokens.length; c++) {
+                        String token = tokens[c];
+                        if(token == "") {
+                            tokens[c] = "0";
+                        }
+                    }
+                    sentenceParsers.get(type).parse(tokens, position);
+                } catch (Exception e) {
+                }
+
             }
             position.updatefix();
         }
@@ -140,12 +150,7 @@ public class NMEAParser {
 
     public Location location(String str) {
         Location localLocation;
-        GPSPosition GPSPos;
-        try {
-            GPSPos = parse(str);
-        } catch (Exception e) {
-            return null;
-        }
+        GPSPosition GPSPos = parse(str);
 
         if (!GPSPos.fixed) {
             GPSPos = null;

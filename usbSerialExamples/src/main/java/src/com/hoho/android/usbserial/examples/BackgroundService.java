@@ -66,12 +66,12 @@ public class BackgroundService extends Service {
                         }
                     }
 
-                    final String message = "Read " + data.length + " bytes: \n"
-                            + result.toString() + "\n\n";
+                    //final String message = "Read " + data.length + " bytes: \n"
+                    //        + result.toString() + "\n\n";
 
                     Location loc = parser.location(result.toString());
 
-                    Log.i(TAG, "reading GPS");
+                    //Log.i(TAG, "reading GPS");
 
                     if (loc != null) {
                         mockLocationProvider.pushLocation(loc);
@@ -168,7 +168,9 @@ public class BackgroundService extends Service {
 
     //if the device is still attached try and restart
     private void checkDevice() {
-        startIoManager();
+        if(mUsbDevice != null) {
+            startIoManager();
+        }
     }
 
 
