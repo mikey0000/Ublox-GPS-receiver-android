@@ -41,6 +41,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.TwoLineListItem;
 
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
@@ -79,7 +80,7 @@ public class DeviceListActivity extends Activity {
             switch (msg.what) {
                 case MESSAGE_REFRESH:
                     refreshDeviceList();
-                    mHandler.sendEmptyMessageDelayed(MESSAGE_REFRESH, REFRESH_TIMEOUT_MILLIS);
+                    //mHandler.sendEmptyMessageDelayed(MESSAGE_REFRESH, REFRESH_TIMEOUT_MILLIS);
                     break;
                 default:
                     super.handleMessage(msg);
@@ -91,6 +92,13 @@ public class DeviceListActivity extends Activity {
 
     private List<UsbSerialPort> mEntries = new ArrayList<UsbSerialPort>();
     private ArrayAdapter<UsbSerialPort> mAdapter;
+
+    static class ViewHolder {
+
+        TextView textViewItem;
+        TextView textViewItem2;
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -110,13 +118,17 @@ public class DeviceListActivity extends Activity {
                 android.R.layout.simple_expandable_list_item_2, mEntries) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                final TwoLineListItem row;
+                ViewHolder holder;
                 if (convertView == null){
-                    final LayoutInflater inflater =
-                            (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    row = (TwoLineListItem) inflater.inflate(android.R.layout.simple_list_item_2, null);
+                    LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    convertView = inflater.inflate(R.layout.two_list_item, null);
+
+                    holder = new ViewHolder();
+                    holder.textViewItem = (TextView) convertView.findViewById(R.id.text1);
+                    holder.textViewItem2 = (TextView) convertView.findViewById(R.id.text2);
+                    convertView.setTag(holder);
                 } else {
-                    row = (TwoLineListItem) convertView;
+                    holder = (ViewHolder) convertView.getTag();
                 }
 
                 final UsbSerialPort port = mEntries.get(position);
@@ -126,12 +138,12 @@ public class DeviceListActivity extends Activity {
                 final String title = String.format("Vendor %s Product %s",
                         HexDump.toHexString((short) device.getVendorId()),
                         HexDump.toHexString((short) device.getProductId()));
-                row.getText1().setText(title);
+                holder.textViewItem.setText(title);
 
                 final String subtitle = driver.getClass().getSimpleName();
-                row.getText2().setText(subtitle);
+                holder.textViewItem2.setText(subtitle);
 
-                return row;
+                return convertView;
             }
 
         };
@@ -147,6 +159,7 @@ public class DeviceListActivity extends Activity {
                 }
 
                 final UsbSerialPort port = mEntries.get(position);
+                mHandler.removeMessages(MESSAGE_REFRESH);
                 showConsoleActivity(port);
             }
         });
@@ -215,6 +228,7 @@ public class DeviceListActivity extends Activity {
 
         PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0, startIntent, PendingIntent.FLAG_CANCEL_CURRENT);
         mUsbManager.requestPermission(port.getDriver().getDevice(), pendingIntent);
+        Toast.makeText(this, "Started Background Service for GPS", Toast.LENGTH_LONG).show();
         //SerialConsoleActivity.show(this, port);
     }
 

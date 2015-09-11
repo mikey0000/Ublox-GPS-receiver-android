@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.usb.UsbManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -22,6 +23,8 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BackgroundService extends Service {
 
@@ -34,6 +37,7 @@ public class BackgroundService extends Service {
 
     private final String TAG = BackgroundService.class.getSimpleName();
 
+    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     private static UsbSerialPort sPort = null;
 
@@ -48,7 +52,7 @@ public class BackgroundService extends Service {
                 @Override
                 public void onRunError(Exception e) {
                     Log.d(TAG, "Runner stopped.");
-                    startIoManager();
+                    checkDevice();
                 }
 
                 @Override
@@ -84,7 +88,21 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+        registerReceiver(mReceiver, filter);
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
+        mUsbDevice = null;
+        if (mUsbConnection != null) {
+            mUsbConnection.close();
+        }
+    }
+
 
 
     @Override
@@ -125,7 +143,8 @@ public class BackgroundService extends Service {
             return Service.START_REDELIVER_INTENT;
         }
 
-        startReceiverThread();
+        Log.i(TAG, "started GPS RECEIVER");
+        startIoManager();
         return Service.START_REDELIVER_INTENT;
     }
 
@@ -136,14 +155,21 @@ public class BackgroundService extends Service {
             final String action = intent.getAction();
 
             if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+                mUsbDevice = null;
                 stopIoManager();
+                stopSelf();
             }
 
-            if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-                //startIoManager();
-            }
+//            if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+//                //startIoManager();
+//            }
         }
     };
+
+    //if the device is still attached try and restart
+    private void checkDevice() {
+        startIoManager();
+    }
 
 
     private void stopIoManager() {
@@ -158,15 +184,7 @@ public class BackgroundService extends Service {
         if (sPort != null) {
             Log.i(TAG, "Starting io manager ..");
             mSerialIoManager = new SerialInputOutputManager(sPort, mListener);
-            mSerialIoManager.run();
+            mExecutor.submit(mSerialIoManager);
         }
-    }
-
-    private void startReceiverThread() {
-        new Thread("GPS_RECEIVER") {
-            public void run() {
-                startIoManager();
-            }
-        }.start();
     }
 }

@@ -10,7 +10,22 @@ And I built this!
 
 ## What does this mess do?
 
-It creates a background service once it picks up the device and you click on the device in the device list. It uses the CdcAcmSerialDriver and sets the custom vendor and product ids.
+It creates a background service once it picks up the device and you click on the device in the device list. It uses the CdcAcmSerialDriver and sets the custom vendor and product ids. It also handles being disconnected and if the queue fails it will attempt to start again.
+
+
+## How to Debug
+
+plug your device in
+
+```adb tcpip 4455```
+
+unplug your device
+
+```adb connect 192.168.1.103:4455```
+
+then run adb commands as usual
+
+```adb logcat```
 
 
 ## Can I help with X
