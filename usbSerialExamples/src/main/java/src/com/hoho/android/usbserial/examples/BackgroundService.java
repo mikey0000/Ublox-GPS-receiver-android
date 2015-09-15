@@ -11,7 +11,9 @@ import android.location.LocationManager;
 import android.os.IBinder;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
+import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver;
 import com.hoho.android.usbserial.driver.ProbeTable;
@@ -42,6 +44,31 @@ public class BackgroundService extends Service {
     private static UsbSerialPort sPort = null;
 
     public BackgroundService() {
+    }
+
+    public boolean isMockEnabled() {
+        try {
+            int mock_location = Settings.Secure.getInt(this.getContentResolver(), "mock_location");
+            if (mock_location == 0) {
+                try {
+                    Settings.Secure.putInt(this.getContentResolver(), "mock_location", 1);
+                } catch (Exception ex) {
+                }
+                mock_location = Settings.Secure.getInt(this.getContentResolver(), "mock_location");
+            }
+
+            if (mock_location == 0) {
+                Toast.makeText(this, "Turn on the mock locations in your Android settings", Toast.LENGTH_LONG).show();
+                return false;
+            } else {
+                return true;
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return false;
     }
 
     private SerialInputOutputManager mSerialIoManager;
@@ -110,6 +137,10 @@ public class BackgroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        if(!isMockEnabled()) {
+            return Service.START_FLAG_RETRY;
+        }
 
         mockLocationProvider = new MockLocationProvider(LocationManager.GPS_PROVIDER, this);
 
