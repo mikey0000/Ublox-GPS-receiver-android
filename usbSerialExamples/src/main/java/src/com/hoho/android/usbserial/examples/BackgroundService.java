@@ -75,7 +75,7 @@ public class BackgroundService extends Service {
 
                     if (loc != null) {
                         mockLocationProvider.pushLocation(loc);
-                        Log.i(TAG, loc.toString());
+                        //Log.i(TAG, loc.toString());
                     }
                 }
             };
@@ -98,6 +98,9 @@ public class BackgroundService extends Service {
         super.onDestroy();
         unregisterReceiver(mReceiver);
         mUsbDevice = null;
+        if(mockLocationProvider != null) {
+            mockLocationProvider.shutdown();
+        }
         if (mUsbConnection != null) {
             mUsbConnection.close();
         }

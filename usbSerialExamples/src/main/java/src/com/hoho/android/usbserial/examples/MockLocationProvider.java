@@ -50,6 +50,9 @@ public class MockLocationProvider {
     public void shutdown() {
         LocationManager lm = (LocationManager) ctx.getSystemService(
                 Context.LOCATION_SERVICE);
+        lm.clearTestProviderEnabled(providerName);
+        lm.clearTestProviderLocation(providerName);
+        lm.clearTestProviderStatus(providerName);
         lm.removeTestProvider(providerName);
     }
 }
