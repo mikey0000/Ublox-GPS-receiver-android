@@ -47,15 +47,27 @@ public class BackgroundService extends Service {
     }
 
     public boolean isMockEnabled() {
+
+
+        int mock_location = 0;
         try {
-            int mock_location = Settings.Secure.getInt(this.getContentResolver(), "mock_location");
-            if (mock_location == 0) {
-                try {
-                    Settings.Secure.putInt(this.getContentResolver(), "mock_location", 1);
-                } catch (Exception ex) {
-                }
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                AppOpsManager opsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+                mock_location = (opsManager.checkOp(AppOpsManager.OPSTR_MOCK_LOCATION, android.os.Process.myUid(), BuildConfig.APPLICATION_ID)== AppOpsManager.MODE_ALLOWED);
+
+            } else {
+
                 mock_location = Settings.Secure.getInt(this.getContentResolver(), "mock_location");
+                if (mock_location == 0) {
+                    try {
+                        Settings.Secure.putInt(this.getContentResolver(), "mock_location", 1);
+                    } catch (Exception ex) {
+
+                    }
+                }
             }
+
 
             if (mock_location == 0) {
                 Toast.makeText(this, "Turn on the mock locations in your Android settings", Toast.LENGTH_LONG).show();
