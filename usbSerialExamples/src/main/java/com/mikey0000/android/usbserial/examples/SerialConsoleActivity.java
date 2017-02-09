@@ -19,7 +19,7 @@
  * Project home page: https://github.com/mik3y/usb-serial-for-android
  */
 
-package com.hoho.android.usbserial.examples;
+package com.mikey0000.android.usbserial.examples;
 
 import android.app.Activity;
 import android.content.Context;
@@ -36,13 +36,11 @@ import android.widget.TextView;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
-import com.hoho.android.usbserial.examples.NMEAParser;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import src.com.hoho.android.usbserial.examples.MockLocationProvider;
 
 /**
  * Monitors a single {@link UsbSerialPort} instance, showing all data

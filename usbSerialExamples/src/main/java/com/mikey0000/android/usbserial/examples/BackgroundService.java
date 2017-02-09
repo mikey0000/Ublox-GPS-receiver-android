@@ -1,16 +1,18 @@
-package src.com.hoho.android.usbserial.examples;
+package com.mikey0000.android.usbserial.examples;
 
 import android.app.Service;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.IBinder;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,7 +22,6 @@ import com.hoho.android.usbserial.driver.ProbeTable;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
-import com.hoho.android.usbserial.examples.NMEAParser;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
@@ -48,18 +49,18 @@ public class BackgroundService extends Service {
 
     public boolean isMockEnabled() {
 
+        boolean mock_location = false;
 
-        int mock_location = 0;
         try {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-                AppOpsManager opsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+                AppOpsManager opsManager = (AppOpsManager) this.getApplicationContext().getSystemService(Context.APP_OPS_SERVICE);
                 mock_location = (opsManager.checkOp(AppOpsManager.OPSTR_MOCK_LOCATION, android.os.Process.myUid(), BuildConfig.APPLICATION_ID)== AppOpsManager.MODE_ALLOWED);
 
             } else {
 
-                mock_location = Settings.Secure.getInt(this.getContentResolver(), "mock_location");
-                if (mock_location == 0) {
+                mock_location = Settings.Secure.getInt(this.getContentResolver(), "mock_location") == 1;
+                if (!mock_location) {
                     try {
                         Settings.Secure.putInt(this.getContentResolver(), "mock_location", 1);
                     } catch (Exception ex) {
@@ -68,19 +69,15 @@ public class BackgroundService extends Service {
                 }
             }
 
-
-            if (mock_location == 0) {
+            if (!mock_location) {
                 Toast.makeText(this, "Turn on the mock locations in your Android settings", Toast.LENGTH_LONG).show();
-                return false;
-            } else {
-                return true;
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        return false;
+        return mock_location;
     }
 
     private SerialInputOutputManager mSerialIoManager;
@@ -105,12 +102,12 @@ public class BackgroundService extends Service {
                         }
                     }
 
-                    //final String message = "Read " + data.length + " bytes: \n"
-                    //        + result.toString() + "\n\n";
+                    //final String message = "Read " + data.length + " bytes: "
+                    //       + result.toString() + "\n";
 
                     Location loc = parser.location(result.toString());
 
-                    //Log.i(TAG, "reading GPS");
+                    //Log.i(TAG, "reading GPS: " + message );
 
                     if (loc != null) {
                         mockLocationProvider.pushLocation(loc);
@@ -158,6 +155,8 @@ public class BackgroundService extends Service {
 
         ProbeTable customTable = new ProbeTable();
         customTable.addProduct(0x1546, 0x01a7, CdcAcmSerialDriver.class);
+        customTable.addProduct(0x1546, 0x01a6, CdcAcmSerialDriver.class);
+
         UsbSerialProber prober = new UsbSerialProber(customTable);
 
         mUsbDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
