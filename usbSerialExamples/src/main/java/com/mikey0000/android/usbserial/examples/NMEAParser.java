@@ -6,17 +6,14 @@ package com.mikey0000.android.usbserial.examples;
 
 import android.location.Location;
 import android.os.SystemClock;
-import android.util.Log;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class NMEAParser {
 
-    // fucking java interfaces
+    // java interfaces
     interface SentenceParser {
         public boolean parse(String[] tokens, GPSPosition position);
     }
@@ -48,7 +45,7 @@ public class NMEAParser {
             position.lat = Latitude2Decimal(tokens[2], tokens[3]);
             position.lon = Longitude2Decimal(tokens[4], tokens[5]);
             position.quality = Integer.parseInt(tokens[6]);
-            position.numberOfSatelites = Integer.parseInt(tokens[7]);
+            position.numberOfSatellites = Integer.parseInt(tokens[7]);
             position.hdop = Float.parseFloat(tokens[8]);
             position.altitude = Float.parseFloat(tokens[9]);
             return true;
@@ -97,7 +94,8 @@ public class NMEAParser {
         public float dir = 0.0f;
         public float altitude = 0.0f;
         public float velocity = 0.0f;
-        public int numberOfSatelites = 0;
+        public int numberOfSatellites = 0;
+        // See: https://en.wikipedia.org/wiki/Dilution_of_precision_(navigation)
         public float hdop = 0.0f;
 
         public boolean fixed = false;
@@ -108,8 +106,8 @@ public class NMEAParser {
 
         public String toString() {
             return String.format(
-                    "POSITION: lat: %f, lon: %f, time: %f, Q: %d, hdop: %f, dir: %f, alt: %f, vel: %f",
-                    lat, lon, time, quality, hdop, dir, altitude, velocity
+                    "POSITION: lat: %f, lon: %f, time: %f, Q: %d, hdop: %f, dir: %f, alt: %f, vel: %f, # of sat: %d",
+                    lat, lon, time, quality, hdop, dir, altitude, velocity, numberOfSatellites
             );
         }
     }
@@ -117,20 +115,27 @@ public class NMEAParser {
     GPSPosition position = new GPSPosition();
 
     private static final Map<String, SentenceParser> sentenceParsers = new HashMap<String, SentenceParser>();
+
+    /**
+     * Maps a NMEA quality identifier to the best possible accuracy value (in meters)
+     */
     protected static final Map<Integer,Float> qualityAccuracy = new HashMap<Integer, Float>();
 
     public NMEAParser() {
         sentenceParsers.put("GPGGA", new GPGGA());
-        //sentenceParsers.put("GPGGL", new GPGGL());
-        //sentenceParsers.put("GPRMC", new GPRMC());
-        //sentenceParsers.put("GPRMZ", new GPRMZ());
+        sentenceParsers.put("GPGGL", new GPGGL());
+        sentenceParsers.put("GPRMC", new GPRMC());
+        sentenceParsers.put("GPRMZ", new GPRMZ());
         //only really good GPS devices have this sentence but ...
         //sentenceParsers.put("GPVTG", new GPVTG());
 
-        qualityAccuracy.put( 0, 10000.0f ); // invalid
+        // concrete accuracy values (in meters) per NMEA quality level
+        // this is used to calculate the position accuracy in NMEAParser.calculateAccuracy
+        qualityAccuracy.put( 0, 0.0f ); // invalid
         qualityAccuracy.put( 1, 2.0f ); // GPS 2d/3d
         qualityAccuracy.put( 2, 0.7f ); // DGNSS
         qualityAccuracy.put( 4, 0.04f ); // RTK fixed
+        qualityAccuracy.put( 5, 0.04f ); // RTK fixed
     }
 
     public GPSPosition parse(String line) {
