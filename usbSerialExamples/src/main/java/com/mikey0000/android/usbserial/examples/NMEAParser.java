@@ -106,8 +106,8 @@ public class NMEAParser {
 
         public String toString() {
             return String.format(
-                    "POSITION: lat: %f, lon: %f, time: %f, Q: %d, hdop: %f, dir: %f, alt: %f, vel: %f, # of sat: %d",
-                    lat, lon, time, quality, hdop, dir, altitude, velocity, numberOfSatellites
+                    "POSITION: lat: %f, lon: %f, time: %f, Q: %d, hdop: %f, dir: %f, alt: %f, vel: %f, # of sat: %d, fixed: %b",
+                    lat, lon, time, quality, hdop, dir, altitude, velocity, numberOfSatellites, fixed
             );
         }
     }
