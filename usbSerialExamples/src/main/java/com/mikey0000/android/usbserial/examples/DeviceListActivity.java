@@ -19,7 +19,7 @@
  * Project home page: https://github.com/mik3y/usb-serial-for-android
  */
 
-package com.hoho.android.usbserial.examples;
+package com.mikey0000.android.usbserial.examples;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -53,8 +53,6 @@ import com.hoho.android.usbserial.util.HexDump;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import src.com.hoho.android.usbserial.examples.BackgroundService;
 
 /**
  * Shows a {@link ListView} of available USB devices.
@@ -112,6 +110,7 @@ public class DeviceListActivity extends Activity {
 
         ProbeTable customTable = new ProbeTable();
         customTable.addProduct(0x1546, 0x01a7, CdcAcmSerialDriver.class);
+        customTable.addProduct(0x1546, 0x01a6, CdcAcmSerialDriver.class);
         prober = new UsbSerialProber(customTable);
 
         mAdapter = new ArrayAdapter<UsbSerialPort>(this,

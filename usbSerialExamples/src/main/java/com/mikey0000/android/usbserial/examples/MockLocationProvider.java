@@ -1,4 +1,4 @@
-package src.com.hoho.android.usbserial.examples;
+package com.mikey0000.android.usbserial.examples;
 
 import android.content.Context;
 import android.location.Location;

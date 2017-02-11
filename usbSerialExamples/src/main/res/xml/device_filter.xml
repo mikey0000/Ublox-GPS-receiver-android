@@ -2,7 +2,10 @@
 <resources>
     <!-- 0x1546 / 0x01a7: ublox 7020 -->
     <usb-device vendor-id="5446" product-id="423" />
-    
+
+    <!-- 0x1546 / 0x01a6: ublox NEO-6P -->
+    <usb-device vendor-id="5446" product-id="422" />
+
     <!-- 0x0403 / 0x6015: FTDI FT231X -->
     <usb-device vendor-id="1027" product-id="24597" />
 

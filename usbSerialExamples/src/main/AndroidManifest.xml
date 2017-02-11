@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hoho.android.usbserial.examples"
+    package="com.mikey0000.android.usbserial.examples"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -43,7 +43,7 @@
         </activity>
 
         <service
-            android:name="src.com.hoho.android.usbserial.examples.BackgroundService"
+            android:name="com.mikey0000.android.usbserial.examples.BackgroundService"
             android:enabled="true"
             android:exported="true" >
         </service>
