@@ -148,7 +148,7 @@ public class BackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         if(!isMockEnabled()) {
-            return Service.START_FLAG_RETRY;
+            return Service.START_STICKY;
         }
 
         mockLocationProvider = new MockLocationProvider(LocationManager.GPS_PROVIDER, this);
@@ -170,7 +170,7 @@ public class BackgroundService extends Service {
 
         UsbDeviceConnection connection = mUsbManager.openDevice(sPort.getDriver().getDevice());
         if (connection == null) {
-            return Service.START_FLAG_RETRY;
+            return Service.START_STICKY;
         }
 
         try {
