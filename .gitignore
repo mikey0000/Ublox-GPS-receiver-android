@@ -29,3 +29,5 @@ proguard/
 
 #IDE
 .idea/
+
+.DS_Store
